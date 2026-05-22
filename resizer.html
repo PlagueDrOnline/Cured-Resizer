@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cured Resizer | Plague-Doctor-Studio</title>
+    <style>
+        :root {
+            --neon-green: #00ff00;
+            --bg-dark: #0a0a0a;
+            --panel-bg: #151515;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-dark);
+            color: var(--neon-green);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .terminal {
+            width: 500px;
+            background: var(--panel-bg);
+            border: 2px solid var(--neon-green);
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.15);
+            text-align: center;
+        }
+
+        h1 { font-size: 1.5rem; margin-bottom: 1rem; text-shadow: 0 0 5px var(--neon-green); }
+        
+        .upload-box {
+            border: 1px dashed var(--neon-green);
+            padding: 20px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .upload-box:hover { background: rgba(0, 255, 0, 0.05); }
+
+        .controls { margin: 1.5rem 0; text-align: left; }
+        
+        label { display: block; margin-bottom: 5px; font-size: 0.8rem; }
+        
+        input[type="number"] {
+            width: 100%;
+            background: #000;
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            padding: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: transform 0.1s;
+        }
+
+        button:active { transform: scale(0.98); }
+        button:disabled { background: #333; color: #666; cursor: not-allowed; }
+
+        #status { font-size: 0.75rem; margin-top: 1rem; color: #888; }
+        canvas { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="terminal">
+    <h1>🎭 CURED RESIZER v1.0</h1>
+    <p style="font-size: 0.8rem;">Optimizing for GitHub Social Previews</p>
+
+    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+        <span id="fileLabel">DROP FILE OR CLICK TO UPLOAD</span>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+    </div>
+
+    <div class="controls">
+        <label>QUALITY COMPRESSION (0.1 - 1.0)</label>
+        <input type="number" id="quality" value="0.8" step="0.1" min="0.1" max="1.0">
+    </div>
+
+    <button id="processBtn">Inject Resize & Download</button>
+    <div id="status">Protocol Ready...</div>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const processBtn = document.getElementById('processBtn');
+    const status = document.getElementById('status');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    fileInput.onchange = e => {
+        if (e.target.files[0]) document.getElementById('fileLabel').innerText = e.target.files[0].name;
+    };
+
+    processBtn.onclick = () => {
+        const file = fileInput.files[0];
+        if (!file) return alert("No file detected.");
+
+        status.innerText = "Processing Image...";
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onload = event => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                // GITHUB IDEAL SPECS
+                canvas.width = 1280;
+                canvas.height = 640;
+
+                // Clear and Draw
+                ctx.fillStyle = "#000";
+                ctx.fillRect(0, 0, 1280, 640);
+                
+                // Scale image to fill 1280x640 (preserving aspect ratio is ignored to force fit)
+                ctx.drawImage(img, 0, 0, 1280, 640);
+
+                const quality = parseFloat(document.getElementById('quality').value);
+                const dataUrl = canvas.toDataURL('image/jpeg', quality);
+
+                const link = document.createElement('a');
+                link.download = 'cured-social-preview.jpg';
+                link.href = dataUrl;
+                link.click();
+
+                status.innerText = "Cure Applied. Check Downloads Folder.";
+            };
+        };
+    };
+</script>
+</body>
+</html>
